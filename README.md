@@ -1,9 +1,11 @@
 <p align="center">
-  <img src="assets/lupettogo-banner.png" width="160" alt="LupettoGo logo" />
+  <img src="assets/images.png" alt="LupettoGo logo" />
 </p>
 
 <h1 align="center">LupettoGo 🐺</h1>
 <p align="center"><i>With the little wolf, no project is too big.</i></p>
+
+---
 
 # LupettoGo
 
