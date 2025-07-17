@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"os/exec"
 	"strings"
 
@@ -23,7 +22,7 @@ var doctorCmd = &cobra.Command{
 
 		check("MySQL (optional)", "mysql", "--version", "mysql", nil)
 
-		checkTemplateDir()
+		fmt.Println("✅ Templates embedded in binary")
 	},
 }
 
@@ -43,14 +42,6 @@ func check(name, bin, arg, expect string, validator func(string) bool) {
 	}
 
 	fmt.Printf("✅ %s OK: %s\n", name, outStr)
-}
-
-func checkTemplateDir() {
-	if _, err := os.Stat("templates"); os.IsNotExist(err) {
-		fmt.Println("❌ templates/ folder is missing")
-	} else {
-		fmt.Println("✅ templates/ folder is present")
-	}
 }
 
 func init() {

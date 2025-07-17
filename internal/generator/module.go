@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"text/template"
 )
 
 type ModuleData struct {
@@ -44,13 +43,6 @@ func GenerateModule(moduleName string) error {
 }
 
 func generateModuleFiles(data ModuleData) error {
-	templateDir := "templates/modules"
-	
-	// Check if we're in a LupettoGo CLI directory or generated project
-	if _, err := os.Stat(templateDir); os.IsNotExist(err) {
-		return fmt.Errorf("module templates not found. Make sure you're running this from the LupettoGo CLI directory")
-	}
-
 	files := map[string]string{
 		"model.go.tmpl":      fmt.Sprintf("internal/models/%s.go", data.ModuleName),
 		"repository.go.tmpl": fmt.Sprintf("internal/repositories/%s_repository.go", data.ModuleName),
@@ -59,22 +51,20 @@ func generateModuleFiles(data ModuleData) error {
 	}
 
 	for templateFile, outputFile := range files {
-		templatePath := filepath.Join(templateDir, templateFile)
-		
+		// Get template content
+		content, exists := moduleTemplates[templateFile]
+		if !exists {
+			return fmt.Errorf("template %s not found", templateFile)
+		}
+
 		// Create output directory if it doesn't exist
 		outputDir := filepath.Dir(outputFile)
 		if err := os.MkdirAll(outputDir, os.ModePerm); err != nil {
 			return err
 		}
 
-		// Read and process template
-		content, err := os.ReadFile(templatePath)
-		if err != nil {
-			return fmt.Errorf("failed to read template %s: %w", templateFile, err)
-		}
-
 		// Replace placeholders
-		processed := strings.ReplaceAll(string(content), "__module__", data.ModuleName)
+		processed := strings.ReplaceAll(content, "__module__", data.ModuleName)
 		processed = strings.ReplaceAll(processed, "__Module__", data.ModuleTitle)
 		processed = strings.ReplaceAll(processed, "{{.ProjectName}}", data.ProjectName)
 

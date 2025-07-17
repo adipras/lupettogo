@@ -60,18 +60,33 @@
 
 ## 📦 Installation
 
-### Option 1: Build from Source
+### Option 1: Using `go install` (Recommended)
+```bash
+go install github.com/adipras/lupettogo@latest
+```
+
+### Option 2: Download Binary from Releases
+```bash
+# Linux/macOS
+curl -fsSL https://raw.githubusercontent.com/adipras/lupettogo/main/install.sh | bash
+
+# Or download manually from GitHub Releases
+# https://github.com/adipras/lupettogo/releases
+```
+
+### Option 3: Build from Source
 ```bash
 git clone https://github.com/adipras/lupettogo.git
 cd lupettogo
 go build -o lupettogo main.go
+# Optional: Move to PATH
+sudo mv lupettogo /usr/local/bin/
 ```
 
-### Option 2: Direct Run
+### Verify Installation
 ```bash
-git clone https://github.com/adipras/lupettogo.git
-cd lupettogo
-go run main.go --help
+lupettogo version
+lupettogo doctor  # Check your development environment
 ```
 
 ## 🚀 Quick Start
@@ -79,10 +94,10 @@ go run main.go --help
 ### 1. Create a New Project
 ```bash
 # Basic project with PostgreSQL
-./lupettogo init my-saas-app
+lupettogo init my-saas-app
 
 # Advanced project with custom configuration
-./lupettogo init my-api --db mysql --with-auth --with-docker
+lupettogo init my-api --db mysql --with-auth --with-docker
 ```
 
 ### 2. Setup and Run
@@ -142,7 +157,7 @@ lupettogo --help    # Show all commands and options
 
 ### Basic SaaS Project
 ```bash
-./lupettogo init blog-api
+lupettogo init blog-api
 cd blog-api
 lupettogo generate module post
 lupettogo generate module user
@@ -150,7 +165,7 @@ lupettogo generate module user
 
 ### E-commerce Backend
 ```bash
-./lupettogo init ecommerce-api --db mysql --with-auth
+lupettogo init ecommerce-api --db mysql --with-auth
 cd ecommerce-api
 lupettogo generate module product
 lupettogo generate module order
@@ -159,7 +174,7 @@ lupettogo generate module customer
 
 ### Microservice with Testing
 ```bash
-./lupettogo init user-service --with-tests --with-docker
+lupettogo init user-service --with-tests --with-docker
 cd user-service
 make test-coverage
 make docker-build
