@@ -1,73 +1,83 @@
-/*
-Copyright © 2025 Adi Prasetyo <adipras2310@gmail.com>
-*/
 package cmd
 
 import (
 	"fmt"
-	"io"
-	"os"
-	"path/filepath"
 
+	"github.com/adipras/lupettogo/internal/generator"
 	"github.com/spf13/cobra"
+)
+
+var (
+	dbDriver   string
+	withAuth   bool
+	withDocker bool
+	withTests  bool
 )
 
 var initCmd = &cobra.Command{
 	Use:   "init [project-name]",
 	Short: "Generate a new Golang SaaS starter project",
-	Args:  cobra.ExactArgs(1),
+	Long: `Generate a new production-ready Golang SaaS starter project with clean architecture.
+
+The project includes:
+- Clean architecture structure (handlers, services, repositories, models)
+- Configuration management with Viper
+- Database integration with GORM
+- HTTP server with Gin
+- Middleware support (CORS, logging, recovery)
+- Environment configuration
+- Docker support (optional)
+- Testing infrastructure (optional)
+
+Examples:
+  lupettogo init my-saas-app
+  lupettogo init my-api --db postgres --with-auth --with-docker
+  lupettogo init simple-api --db mysql --with-tests`,
+	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		projectName := args[0]
-		src := "templates"
-		dest := projectName
 
-		// Buat folder tujuan
-		if err := os.MkdirAll(dest, os.ModePerm); err != nil {
-			return fmt.Errorf("failed to create project folder: %w", err)
+		// Validate project name
+		if err := validateProjectName(projectName); err != nil {
+			return err
 		}
 
-		// Salin file dari templates ke folder tujuan
-		err := filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
+		// Show configuration
+		fmt.Printf("🐺 Creating project '%s' with:\n", projectName)
+		fmt.Printf("   Database: %s\n", dbDriver)
+		fmt.Printf("   Auth: %v\n", withAuth)
+		fmt.Printf("   Docker: %v\n", withDocker)
+		fmt.Printf("   Tests: %v\n", withTests)
+		fmt.Println()
 
-			relPath, _ := filepath.Rel(src, path)
-			targetPath := filepath.Join(dest, relPath)
-
-			if info.IsDir() {
-				return os.MkdirAll(targetPath, os.ModePerm)
-			}
-
-			return copyFile(path, targetPath)
-		})
-
-		if err != nil {
-			return fmt.Errorf("failed to copy template: %w", err)
+		config := generator.ProjectConfig{
+			Name:       projectName,
+			DBDriver:   dbDriver,
+			WithAuth:   withAuth,
+			WithDocker: withDocker,
+			WithTests:  withTests,
 		}
 
-		fmt.Printf("✅ Project '%s' created successfully!\n", projectName)
-		return nil
+		return generator.GenerateProjectWithConfig(config)
 	},
 }
 
-func copyFile(src, dst string) error {
-	in, err := os.Open(src)
-	if err != nil {
-		return err
+func validateProjectName(name string) error {
+	if len(name) == 0 {
+		return fmt.Errorf("project name cannot be empty")
 	}
-	defer in.Close()
-
-	out, err := os.Create(dst)
-	if err != nil {
-		return err
+	if len(name) > 50 {
+		return fmt.Errorf("project name too long (max 50 characters)")
 	}
-	defer out.Close()
-
-	_, err = io.Copy(out, in)
-	return err
+	// Add more validation as needed
+	return nil
 }
 
 func init() {
+	initCmd.Flags().StringVar(&dbDriver, "db", "postgres", "Database driver (postgres, mysql)")
+	initCmd.Flags().BoolVar(&withAuth, "with-auth", false, "Include authentication scaffolding")
+	initCmd.Flags().BoolVar(&withDocker, "with-docker", true, "Include Docker configuration")
+	initCmd.Flags().BoolVar(&withTests, "with-tests", true, "Include testing infrastructure")
+
 	rootCmd.AddCommand(initCmd)
 }

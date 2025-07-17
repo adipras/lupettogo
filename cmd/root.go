@@ -15,13 +15,13 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "lupettogo",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+	Short: "🐺 CLI tool to scaffold production-ready Golang SaaS starter projects",
+	Long: `LupettoGo is a CLI tool to scaffold production-ready Golang SaaS starter projects.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+With the little wolf, no project is too big.
+
+This tool helps you quickly create new Go projects with clean architecture,
+ready to extend with features like auth, RBAC, and multi-tenant support.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },

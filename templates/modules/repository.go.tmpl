@@ -1,0 +1,54 @@
+package repositories
+
+import (
+	"{{.ProjectName}}/internal/models"
+	"gorm.io/gorm"
+)
+
+type __Module__Repository struct {
+	db *gorm.DB
+}
+
+func New__Module__Repository(db *gorm.DB) *__Module__Repository {
+	return &__Module__Repository{
+		db: db,
+	}
+}
+
+func (r *__Module__Repository) FindAll() ([]*models.__Module__, error) {
+	var __module__s []*models.__Module__
+	err := r.db.Find(&__module__s).Error
+	return __module__s, err
+}
+
+func (r *__Module__Repository) FindByID(id uint) (*models.__Module__, error) {
+	var __module__ models.__Module__
+	err := r.db.First(&__module__, id).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &__module__, nil
+}
+
+func (r *__Module__Repository) Create(__module__ *models.__Module__) (*models.__Module__, error) {
+	err := r.db.Create(__module__).Error
+	return __module__, err
+}
+
+func (r *__Module__Repository) Update(__module__ *models.__Module__) (*models.__Module__, error) {
+	err := r.db.Save(__module__).Error
+	return __module__, err
+}
+
+func (r *__Module__Repository) Delete(id uint) error {
+	return r.db.Delete(&models.__Module__{}, id).Error
+}
+
+func (r *__Module__Repository) FindByField(field string, value interface{}) ([]*models.__Module__, error) {
+	var __module__s []*models.__Module__
+	err := r.db.Where(field+" = ?", value).Find(&__module__s).Error
+	return __module__s, err
+}

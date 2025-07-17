@@ -1,0 +1,73 @@
+package services
+
+import (
+	"{{.ProjectName}}/internal/models"
+	"{{.ProjectName}}/internal/repositories"
+)
+
+type __Module__Service struct {
+	__module__Repo *repositories.__Module__Repository
+}
+
+func New__Module__Service(__module__Repo *repositories.__Module__Repository) *__Module__Service {
+	return &__Module__Service{
+		__module__Repo: __module__Repo,
+	}
+}
+
+func (s *__Module__Service) GetAll__Module__s() ([]*models.__Module__, error) {
+	return s.__module__Repo.FindAll()
+}
+
+func (s *__Module__Service) Get__Module__ByID(id uint) (*models.__Module__, error) {
+	return s.__module__Repo.FindByID(id)
+}
+
+func (s *__Module__Service) Create__Module__(__module__ *models.__Module__) (*models.__Module__, error) {
+	// Add business logic validation here
+	if err := s.validate__Module__(__module__); err != nil {
+		return nil, err
+	}
+
+	return s.__module__Repo.Create(__module__)
+}
+
+func (s *__Module__Service) Update__Module__(__module__ *models.__Module__) (*models.__Module__, error) {
+	// Check if __module__ exists
+	existing, err := s.__module__Repo.FindByID(__module__.ID)
+	if err != nil {
+		return nil, err
+	}
+	if existing == nil {
+		return nil, errors.New("__module__ not found")
+	}
+
+	// Add business logic validation here
+	if err := s.validate__Module__(__module__); err != nil {
+		return nil, err
+	}
+
+	return s.__module__Repo.Update(__module__)
+}
+
+func (s *__Module__Service) Delete__Module__(id uint) error {
+	// Check if __module__ exists
+	existing, err := s.__module__Repo.FindByID(id)
+	if err != nil {
+		return err
+	}
+	if existing == nil {
+		return errors.New("__module__ not found")
+	}
+
+	return s.__module__Repo.Delete(id)
+}
+
+func (s *__Module__Service) validate__Module__(__module__ *models.__Module__) error {
+	// Add your business logic validation here
+	// Example:
+	// if __module__.Name == "" {
+	//     return errors.New("name is required")
+	// }
+	return nil
+}
