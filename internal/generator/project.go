@@ -1,6 +1,7 @@
 package generator
 
 import (
+	"embed"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -8,6 +9,8 @@ import (
 	"text/template"
 )
 
+//go:embed templates/*
+var templatesFS embed.FS
 
 type ProjectData struct {
 	ProjectName string
@@ -61,62 +64,67 @@ func GenerateProjectWithConfig(config ProjectConfig) error {
 }
 
 func processEmbeddedTemplates(dest string, data ProjectData) error {
-	// Process root level templates
-	for filename, content := range templateFiles {
-		if shouldSkipFile(filename, data) {
-			continue
-		}
-		if err := processTemplate(dest, filename, content, data); err != nil {
-			return err
-		}
+	return processTemplateFS(templatesFS, "templates", dest, data)
+}
+
+func processTemplateFS(fsys embed.FS, src, dest string, data ProjectData) error {
+	entries, err := fsys.ReadDir(src)
+	if err != nil {
+		return err
 	}
 
-	// Process internal templates
-	for filename, content := range internalTemplates {
-		if shouldSkipFile(filename, data) {
-			continue
-		}
-		if err := processTemplate(dest, filename, content, data); err != nil {
-			return err
-		}
-	}
+	for _, entry := range entries {
+		srcPath := filepath.Join(src, entry.Name())
+		destPath := filepath.Join(dest, entry.Name())
 
-	// Process test templates if enabled
-	if data.WithTests {
-		for filename, content := range testTemplates {
-			if err := processTemplate(dest, filename, content, data); err != nil {
+		if entry.IsDir() {
+			// Skip modules directory as it's for module generation
+			if entry.Name() == "modules" {
+				continue
+			}
+
+			if err := os.MkdirAll(destPath, os.ModePerm); err != nil {
 				return err
 			}
+
+			if err := processTemplateFS(fsys, srcPath, destPath, data); err != nil {
+				return err
+			}
+			continue
+		}
+
+		// Skip files based on configuration
+		if shouldSkipFile(entry.Name(), data) {
+			continue
+		}
+
+		// Read embedded template file
+		content, err := fsys.ReadFile(srcPath)
+		if err != nil {
+			return err
+		}
+
+		// Process template
+		tmpl, err := template.New("file").Parse(string(content))
+		if err != nil {
+			return err
+		}
+
+		// Create target file
+		file, err := os.Create(destPath)
+		if err != nil {
+			return err
+		}
+
+		// Execute template
+		err = tmpl.Execute(file, data)
+		file.Close()
+		if err != nil {
+			return err
 		}
 	}
 
 	return nil
-}
-
-func processTemplate(dest, filename, content string, data ProjectData) error {
-	targetPath := filepath.Join(dest, filename)
-	
-	// Create directory if it doesn't exist
-	dir := filepath.Dir(targetPath)
-	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
-		return err
-	}
-
-	// Process template
-	tmpl, err := template.New("file").Parse(content)
-	if err != nil {
-		return err
-	}
-
-	// Create target file
-	file, err := os.Create(targetPath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	// Execute template
-	return tmpl.Execute(file, data)
 }
 
 func shouldSkipFile(relPath string, data ProjectData) bool {
